@@ -1,64 +1,56 @@
-const express = require("express");
-const fs = require("fs");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-const DATA_FILE = "./posts.json";
+// In-memory "database"
+let blogs = [];
+let nextId = 1;
 
-function readPosts() {
-  if (!fs.existsSync(DATA_FILE)) return [];
-  return JSON.parse(fs.readFileSync(DATA_FILE));
-}
-
-function writePosts(posts) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(posts, null, 2));
-}
-
-app.get("/posts", (req, res) => {
-  const posts = readPosts();
-  res.json(posts);
+// ➕ Create Blog
+app.post("/blogs", (req, res) => {
+  const { title, content, date } = req.body;
+  const newBlog = { id: nextId++, title, content, date };
+  blogs.push(newBlog);
+  res.status(201).json(newBlog);
 });
 
-app.get("/posts/:id", (req, res) => {
-  const posts = readPosts();
-  const post = posts.find(p => p.id === parseInt(req.params.id));
-  if (!post) return res.status(404).json({ message: "Post not found" });
-  res.json(post);
+// 📖 Get All Blogs
+app.get("/blogs", (req, res) => {
+  res.json(blogs);
 });
 
-
-app.post("/posts", (req, res) => {
-  const posts = readPosts();
-  const newPost = {
-    id: Date.now(),
-    title: req.body.title,
-    content: req.body.content,
-    author: req.body.author
-  };
-  posts.push(newPost);
-  writePosts(posts);
-  res.status(201).json(newPost);
+// 📖 Get Single Blog by ID
+app.get("/blogs/:id", (req, res) => {
+  const blog = blogs.find((b) => b.id == req.params.id);
+  if (!blog) return res.status(404).json({ message: "Blog not found" });
+  res.json(blog);
 });
 
-app.put("/posts/:id", (req, res) => {
-  const posts = readPosts();
-  const index = posts.findIndex(p => p.id === parseInt(req.params.id));
-  if (index === -1) return res.status(404).json({ message: "Post not found" });
+// ✏️ Update Blog
+app.put("/blogs/:id", (req, res) => {
+  const blog = blogs.find((b) => b.id == req.params.id);
+  if (!blog) return res.status(404).json({ message: "Blog not found" });
 
-  posts[index] = { ...posts[index], ...req.body };
-  writePosts(posts);
-  res.json(posts[index]);
+  blog.title = req.body.title || blog.title;
+  blog.content = req.body.content || blog.content;
+  blog.date = req.body.date || blog.date;
+
+  res.json(blog);
 });
 
-app.delete("/posts/:id", (req, res) => {
-  let posts = readPosts();
-  posts = posts.filter(p => p.id !== parseInt(req.params.id));
-  writePosts(posts);
-  res.json({ message: "Post deleted" });
+// 🗑️ Delete Blog
+app.delete("/blogs/:id", (req, res) => {
+  blogs = blogs.filter((b) => b.id != req.params.id);
+  res.json({ message: "Blog deleted" });
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Start server
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+});

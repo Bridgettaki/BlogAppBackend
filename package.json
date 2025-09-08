@@ -1,15 +1,21 @@
 {
   "name": "blogappbackend",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Backend for Blog App using Express.js",
+  "main": "server.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["blog", "express", "backend"],
+  "author": "bridget",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
