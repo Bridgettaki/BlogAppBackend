@@ -4,15 +4,11 @@ import cors from "cors";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
-
-// In-memory "database"
 let blogs = [];
 let nextId = 1;
 
-// ➕ Create Blog
 app.post("/blogs", (req, res) => {
   const { title, content, date } = req.body;
   const newBlog = { id: nextId++, title, content, date };
@@ -20,19 +16,16 @@ app.post("/blogs", (req, res) => {
   res.status(201).json(newBlog);
 });
 
-// 📖 Get All Blogs
 app.get("/blogs", (req, res) => {
   res.json(blogs);
 });
 
-// 📖 Get Single Blog by ID
 app.get("/blogs/:id", (req, res) => {
   const blog = blogs.find((b) => b.id == req.params.id);
   if (!blog) return res.status(404).json({ message: "Blog not found" });
   res.json(blog);
 });
 
-// ✏️ Update Blog
 app.put("/blogs/:id", (req, res) => {
   const blog = blogs.find((b) => b.id == req.params.id);
   if (!blog) return res.status(404).json({ message: "Blog not found" });
@@ -44,7 +37,6 @@ app.put("/blogs/:id", (req, res) => {
   res.json(blog);
 });
 
-// 🗑️ Delete Blog
 app.delete("/blogs/:id", (req, res) => {
   blogs = blogs.filter((b) => b.id != req.params.id);
   res.json({ message: "Blog deleted" });
